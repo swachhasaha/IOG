@@ -1,0 +1,32 @@
+# --- ECS (Elastic Container Service) Permissions ---
+AmazonECSFullAccess
+AmazonECSTaskExecutionRolePolicy
+AmazonECSServiceRolePolicy
+
+# --- ECR (Elastic Container Registry) Permissions (if using private container images) ---
+AmazonEC2ContainerRegistryFullAccess
+
+# --- RDS (PostgreSQL) Permissions ---
+AmazonRDSFullAccess
+AmazonRDSDataFullAccess
+
+# --- S3 (Bucket Access for Data Storage) Permissions ---
+AmazonS3FullAccess
+
+# --- CloudWatch (Logs and Monitoring) Permissions ---
+CloudWatchFullAccess
+CloudWatchLogsFullAccess
+
+# --- EC2 (Networking, Security Groups, Elastic IPs for ECS Tasks) Permissions ---
+AmazonEC2FullAccess
+
+# --- IAM (Role & Policy Management) Permissions ---
+IAMFullAccess
+
+# --- VPC (Networking Configuration for ECS/RDS) Permissions ---
+AmazonVPCFullAccess
+
+# --- Additional Useful Permissions (Optional but Recommended) ---
+AWSCloudFormationFullAccess       # If using CloudFormation or Terraform for automation
+AWSStepFunctionsFullAccess        # For orchestration workflows (optional)
+AWSKeyManagementServicePowerUser  # If using KMS for S3 or RDS encryption
