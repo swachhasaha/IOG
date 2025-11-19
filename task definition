@@ -1,0 +1,102 @@
+{
+  "family": "cvat-service",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/ecsTaskRole",
+  "volumes": [
+    {
+      "name": "cvat_share",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-abcdef12",
+        "rootDirectory": "/",
+        "transitEncryption": "ENABLED"
+      }
+    }
+  ],
+  "containerDefinitions": [
+    {
+      "name": "cvat_server",
+      "image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/cvat/server:latest",
+      "cpu": 512,
+      "memory": 1024,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "CVAT_HOST", "value": "cvat.mycompany.com" },
+        { "name": "CVAT_POSTGRES_HOST", "value": "mydb.abcdef.us-east-1.rds.amazonaws.com" },
+        { "name": "CVAT_POSTGRES_DBNAME", "value": "cvat" },
+        { "name": "CVAT_POSTGRES_USER", "value": "cvatuser" },
+        { "name": "CVAT_POSTGRES_PASSWORD", "value": "SuperSecretPass" }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "cvat_share",
+          "containerPath": "/home/django/share",
+          "readOnly": false
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/cvat",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "cvat_server"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "python3 manage.py health_check || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    },
+    {
+      "name": "cvat_ui",
+      "image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/cvat/ui:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "REACT_APP_CVAT_API_HOST", "value": "http://cvat.mycompany.com:8080" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/cvat",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "cvat_ui"
+        }
+      }
+    },
+    {
+      "name": "cvat_redis",
+      "image": "redis:6.2",
+      "cpu": 128,
+      "memory": 256,
+      "essential": false,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/cvat",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "cvat_redis"
+        }
+      }
+    }
+  ]
+}
